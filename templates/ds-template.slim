@@ -1,0 +1,115 @@
+initialize() {
+    defineConstant("TAA", nucleotidesToCodons("TAA"));
+    defineConstant("TAG", nucleotidesToCodons("TAG"));
+    defineConstant("TGA", nucleotidesToCodons("TGA"));
+    defineConstant("STOP", c(TAA, TAG, TGA));
+    defineConstant("NONSTOP", (0:63)[match(0:63, STOP) < 0]);
+
+    defineConstant("A_FIT", c('P', 'L', 'S'));
+    defineConstant("A_UNFIT", c('G', 'A', 'R'));
+
+    codons = sample(NONSTOP, 10000, replace=T);
+
+    seq1 = randomNucleotides(3000);
+    seq2 = paste0(codonsToNucleotides(codons, format="char")[0:2999]);
+    seq3 = randomNucleotides(3000);
+        seq4 = paste0(codonsToNucleotides(codons, format="char")[3000:5999]);
+        seq5 = randomNucleotides(3000);
+        seq6 = paste0(codonsToNucleotides(codons, format="char")[6000:8999]);
+        seq7 = randomNucleotides(3000);
+        seq8 = paste0(codonsToNucleotides(codons, format="char")[9000:11999]);
+        seq9 = randomNucleotides(3000);
+        seq10 = paste0(codonsToNucleotides(codons, format="char")[12000:14999]);
+        seq11 = randomNucleotides(3000);
+    seq12 = paste0(codonsToNucleotides(codons, format="char")[15000:17999]);
+        seq13 = randomNucleotides(3000);
+        seq14 = paste0(codonsToNucleotides(codons, format="char")[18000:20999]);
+        seq15 = randomNucleotides(3000);
+        seq16 = paste0(codonsToNucleotides(codons, format="char")[21000:23999]);
+        seq17 = randomNucleotides(3000);
+        seq18 = paste0(codonsToNucleotides(codons, format="char")[24000:26999]);
+        seq19 = randomNucleotides(3000);
+        seq20 = paste0(codonsToNucleotides(codons, format="char")[27000:29999]);
+
+    seq = seq1 + seq2 + seq3 + seq4 + seq5 + seq6 + seq7 + seq8 + seq9 + seq10 + seq11 + seq12 + seq13 + seq14 + seq15 + seq16 + seq17 + seq18 + seq19 + seq20;
+    defineConstant("INITIAL", codonsToAminoAcids(codons, paste=F));
+    writeFile("./{{ simtype }}.fa", ">0 \n" + asString(seq));
+
+    initializeSLiMOptions(nucleotideBased=T);
+    initializeAncestralNucleotides(seq);
+    initializeMutationTypeNuc("m1", 0.5, "f", 0.0);
+    initializeGenomicElementType("g1", m1, 1.0, mmJukesCantor({{ mrcoding }}));
+    initializeGenomicElementType("g2", m1, 1.0, mmJukesCantor({{ mrnoncoding }}));
+    initializeGenomicElement(g2, 0, 2999);
+    initializeGenomicElement(g1, 3000, 5999);
+    initializeGenomicElement(g2, 6000, 8999);
+    initializeGenomicElement(g1, 9000, 11999);
+    initializeGenomicElement(g2, 12000, 14999);
+    initializeGenomicElement(g1, 15000, 17999);
+    initializeGenomicElement(g2, 18000, 20999);
+    initializeGenomicElement(g1, 21000, 23999);
+    initializeGenomicElement(g2, 24000, 26999);
+    initializeGenomicElement(g1, 27000, 29999);
+    initializeGenomicElement(g2, 30000, 32999);
+    initializeGenomicElement(g1, 33000, 35999);
+    initializeGenomicElement(g2, 36000, 38999);
+    initializeGenomicElement(g1, 39000, 41999);
+        initializeGenomicElement(g2, 42000, 44999);
+        initializeGenomicElement(g1, 45000, 47999);
+        initializeGenomicElement(g2, 48000, 50999);
+        initializeGenomicElement(g1, 51000, 53999);
+        initializeGenomicElement(g2, 54000, 56999);
+        initializeGenomicElement(g1, 57000, 59999);
+    initializeRecombinationRate({{ recombination }});
+}
+
+fitness(NULL) {
+    i = individual;
+    seq1 = i.genome1.nucleotides(3000,5999) + i.genome1.nucleotides(9000,11999) + i.genome1.nucleotides(15000,17999) + i.genome1.nucleotides(21000,23999) + i.genome1.nucleotides(27000,29999) + i.genome1.nucleotides(33000,35999) + i.genome1.nucleotides(39000,41999) + i.genome1.nucleotides(45000,47999) + i.genome1.nucleotides(51000,53999) + i.genome1.nucleotides(57000,59999);
+    seq2 = i.genome2.nucleotides(3000,5999) + i.genome2.nucleotides(9000,11999) + i.genome2.nucleotides(15000,17999) + i.genome2.nucleotides(21000,23999) + i.genome2.nucleotides(27000,29999) + i.genome2.nucleotides(33000,35999) + i.genome2.nucleotides(39000,41999) + i.genome2.nucleotides(45000,47999) + i.genome2.nucleotides(51000,53999) + i.genome2.nucleotides(57000,59999);
+    codons1 = nucleotidesToCodons(seq1);
+    codons2 = nucleotidesToCodons(seq2);
+    
+    if (sum(match(codons1, STOP) >= 0) | sum(match(codons2, STOP) >= 0))
+        return 0.0;
+    
+    aa1 = codonsToAminoAcids(codons1, paste=F);
+    aa2 = codonsToAminoAcids(codons2, paste=F);
+    
+    fit_count1 = sum(match(aa1, A_FIT) >= 0);
+    unfit_count1 = sum(match(aa1, A_UNFIT) >= 0);
+    mismatch1 = sum(aa1 != INITIAL);
+    
+    fit_count2 = sum(match(aa2, A_FIT) >= 0);
+    unfit_count2 = sum(match(aa2, A_UNFIT) >= 0);
+    mismatch2 = sum(aa2 != INITIAL);
+    
+    if (i.subpopulation == p1) {
+        fitness1 = (fit_count1 + (1/2)*mismatch1)/unfit_count1;
+        fitness2 = (fit_count2 + (1/2)*mismatch2)/unfit_count2;
+        fitness = (fitness1 + fitness2)/2;
+        return fitness;
+    }
+    
+    if (i.subpopulation == p2){
+        fitness1 = (unfit_count1 + (1/2)*mismatch1)/fit_count1;
+        fitness2 = (unfit_count2 + (1/2)*mismatch2)/fit_count2;
+        fitness = (fitness1 + fitness2)/2;
+        return fitness;
+    }
+}
+
+1 {
+    sim.addSubpop("p1", {{ pop1 }});
+    sim.addSubpop("p2", {{ pop2 }});
+    p1.setMigrationRates(p2, {{ gfp1 }});
+    p2.setMigrationRates(p1, {{ gfp2 }});
+}
+
+{% for item in samples %}
+{{ item }} late() {
+    p1.outputVCFSample({{ numsamples }}, filePath="./{{ simtype }}_{{ item }}p1.vcf");
+    p2.outputVCFSample({{ numsamples }}, filePath="./{{ simtype }}_{{ item }}p2.vcf");
+    print("Finished generation {{ item }}");
+}
+{% endfor %}

@@ -1,0 +1,3 @@
+{% for i in range(1,simnum+1) %}
+cd {{ simtype }}-{{ i }}; bgzip {{ simtype }}_{{ sampgen }}p1.vcf; bgzip {{ simtype }}_{{ sampgen }}p2.vcf; bcftools index {{ simtype }}_{{ sampgen }}p1.vcf.gz; bcftools index {{ simtype }}_{{ sampgen }}p2.vcf.gz; bcftools merge {{ simtype }}_{{ sampgen }}p1.vcf.gz {{ simtype }}_{{ sampgen }}p2.vcf.gz -0 --force-samples > {{ simtype }}_{{ sampgen }}p.vcf; python egglib_script.py {{ simtype }}_{{ sampgen }}p.vcf > egglib-{{ sampgen }}_results; cd ..
+{% endfor %}
