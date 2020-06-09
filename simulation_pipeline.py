@@ -6,10 +6,13 @@ def simulation_pipeline(simtype, recombination = 0, gfp1 = 0, gfp2 = 0, pop1 = 5
 	sim_id = random.randrange(0, 100000)
 	new_sim_dir = './' + simtype + '-' + str(sim_id)
 	os.mkdir(new_sim_dir)
-	subprocess.Popen(['cp', '-r', 'SLiM_pipeline', './' + new_sim_dir])
+	copy = subprocess.Popen(['cp', '-r', 'SLiM_pipeline', './' + new_sim_dir])
+	copy.wait()
 	os.chdir(new_sim_dir)
-	subprocess.Popen(['mv', 'SLiM_pipeline/regions.txt', '.'])
-	subprocess.Popen(['mv', 'SLiM_pipeline/egglib_script.py', '.'])
+	regions = subprocess.Popen(['mv', 'SLiM_pipeline/regions.txt', '.'])
+	regions.wait()
+	egglib = subprocess.Popen(['mv', 'SLiM_pipeline/egglib_script.py', '.'])
+	egglib.wait()
 
 	samples = [None] * samplingnum
 	for i in range(samplingnum):
