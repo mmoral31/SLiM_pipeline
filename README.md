@@ -8,6 +8,7 @@
 > - Jinja 2.11.x
 > - EggLib 3.0.0b21
 > - BCFtools (run on v1.9)
+> - SAMtools and HTSlib
 
 
 
@@ -16,6 +17,72 @@
 ---
 
 ​	SLiM is a powerful evolutionary simulation software with sequence-based genome evolution functionality allowing for the creation of genomic data for downstream evolutionary analysis. Despite this, the ability for iteratively altering the parameters of simulations and parallelizing multiple simulations concurrently are unavailable. In creating the SLiM-pipeline package, we provide this functionality and include downstream analyses for calculating evolutionary statistics on simulated genomic data. 
+
+#### Installation:
+
+This section will outline the installation of all prerequisite software and the cloning of the SLiM-pipeline Github. Most prerequisites will be installed within a unique Python 2.7 conda environment for ease of access.
+
+1. Create and activate a unique Python 2.7 conda environment
+
+```bash
+conda create -n SLiM python=2.7
+```
+
+```
+conda activate SLiM
+```
+
+2. Install the most recent version of BCFtools using conda
+
+```bash
+conda install bcftools
+```
+
+3. Install the most recent version of Jinja2 using pip
+
+```bash
+pip install Jinja2
+```
+
+4. Install SLiM from source. Requires downloading the source code from https://messerlab.org/slim/
+
+```bash
+cd SLiM
+cd ..
+mkdir build
+cd build
+cmake ../SLiM
+make slim 
+make install slim
+```
+
+5. Install Egglib from the bioconda channel using conda
+
+```
+conda install -c bioconda egglib
+```
+
+6. Install Samtools and HTSLib from source. Requires downloading the source code of samtools from http://www.htslib.org/download/
+
+```bash
+cd samtools-1.x
+./configure --prefix=/where/to/install
+make
+make install
+```
+
+```bash
+cd htslib
+./configure --prefix=/where/to/install
+make
+make install
+```
+
+7. Clone in the SLiM-pipeline package from the Github repository https://github.com/mmoral31/SLiM_pipeline
+
+```bash
+git clone https://github.com/mmoral31/SLiM_pipeline
+```
 
 #### Usage:
 
@@ -200,5 +267,3 @@ for i in {1..{{ simnum }}}; do cd $1-$i; awk -F" " '/^\{/' egglib-{{ sample }}_r
 ```bash
 for i in {1..3}; do cd $1-$i; awk -F" " '/^\{/' egglib-1250_results | sed 's/[A-Za-z]*//g' | awk -F" " '{print $2 $4 $6 $8 $10 $12 $14 $16}' | sed 's/.$//' | sed '1iS,Fs,Fst,D,Dxy,thetaW,Pi,Da,Region' | paste -d "," /dev/stdin regions.txt > $2_sampgen=1250_run=$i.csv; cd ..; done;
 ```
-
-
