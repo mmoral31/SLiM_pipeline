@@ -20,6 +20,8 @@
 
 #### Installation:
 
+---
+
 This section will outline the installation of all prerequisite software and the cloning of the SLiM-pipeline Github. Most prerequisites will be installed within a unique Python 2.7 conda environment for ease of access.
 
 1. Create and activate a unique Python 2.7 conda environment
