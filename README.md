@@ -16,7 +16,7 @@
 
 ---
 
-​	SLiM is a powerful evolutionary simulation software with sequence-based genome evolution functionality allowing for the creation of genomic data for downstream evolutionary analysis. Despite this, the ability for iteratively altering the parameters of simulations and parallelizing multiple simulations concurrently are unavailable. In creating the SLiM-pipeline package, we provide this functionality and include downstream analyses for calculating evolutionary statistics on simulated genomic data. 
+	SLiM is a powerful evolutionary simulation software with sequence-based genome evolution functionality allowing for the creation of genomic data for downstream evolutionary analysis. Despite this, the ability for iteratively altering the parameters of simulations and parallelizing multiple simulations concurrently are unavailable. In creating the SLiM-pipeline package, we provide this functionality and include downstream analyses for calculating evolutionary statistics on simulated genomic data.
 
 #### Installation:
 
@@ -52,7 +52,7 @@ cd ..
 mkdir build
 cd build
 cmake ../SLiM
-make slim 
+make slim
 make install slim
 ```
 
@@ -88,7 +88,11 @@ git clone https://github.com/mmoral31/SLiM_pipeline
 
 ---
 
+The entire simulation pipeline is run in Python using the simulation_pipeline function of the simulation_pipeline module in the SLiM_pipeline package. Because the entire pipeline is run through a single Python function, the user should create a custom Python script that calls the simulation_pipeline function with a desired set of parameters. The default parameters are listed below. An example Python script can be found in the SLiM_pipeline package (example_runfile.py).
+
 ```python
+from SLiM_pipeline.simulation_pipeline import simulation_pipeline
+
 simulation_pipeline(simtype, recombination = 0, gfp1 = 0, gfp2 = 0, pop1 = 500, pop2 = 500, mrcoding = 2.5e-6, mrnoncoding = 2.5e-6, generations = 5000, samplingnum = 4, numsamples = 10, simnum = 20)
 ```
 
@@ -126,11 +130,11 @@ The rest of this manual will not be run by the user but is automatically run by 
   - pipeline-template.sh
   - ps-template.slim
 
-There are four primary steps in this pipeline: (1) substitution of parameter values into the four template files, (2) running the evolutionary simulations through SLiM, (3) calculating evolutionary statistics using EggLib, and (4) converting output files into CSV format. 
+There are four primary steps in this pipeline: (1) substitution of parameter values into the four template files, (2) running the evolutionary simulations through SLiM, (3) calculating evolutionary statistics using EggLib, and (4) converting output files into CSV format.
 
 ##### <u>1. Substitution of parameter values into the four template files</u>
 
-​	To run a SLiM simulation, the user is required to supply a unique **.slim** script that uses the program-specific Eidos scripting language. Because no parameter values other than this script are supplied to the *slim* function, parameters must be instantiated directly in the .slim script. This makes the process of iteratively changing parameter values difficult as the text within the script must be altered directly. To allow for this functionality, we used the *Jinja2* Python software which can substitute snippets of text (in our case parameter values) into user-created templates. Four template files are used in this pipeline:
+	To run a SLiM simulation, the user is required to supply a unique **.slim** script that uses the program-specific Eidos scripting language. Because no parameter values other than this script are supplied to the *slim* function, parameters must be instantiated directly in the .slim script. This makes the process of iteratively changing parameter values difficult as the text within the script must be altered directly. To allow for this functionality, we used the *Jinja2* Python software which can substitute snippets of text (in our case parameter values) into user-created templates. Four template files are used in this pipeline:
 
 - **ps-template.slim** - Unique .slim script for input into SLiM
 - **pipeline-template.sh** - Bash script for running analyses in steps 2-4
@@ -144,7 +148,7 @@ There are four primary steps in this pipeline: (1) substitution of parameter val
 | commands-template.txt  | Number of simulations                                        |
 | commands2-template.txt | Number of simulations, sampling times                        |
 
-​	The pipeline is initiated when the Python wrapper script *simulation-pipeline.py* is called with the parameter values to substitute (see Usage below). Using *Jinja2*, these parameter values are substituted into the appropriate positions using a respective code block for each template. 
+	The pipeline is initiated when the Python wrapper script *simulation-pipeline.py* is called with the parameter values to substitute (see Usage below). Using *Jinja2*, these parameter values are substituted into the appropriate positions using a respective code block for each template.
 
 e.g. Code block for substituting into the template SLiM script
 
@@ -181,7 +185,7 @@ cat commands.txt | xargs -n {{ simnum }} -P {{ simnum }} -I CMD bash -c CMD;
 cat commands.txt | xargs -n 3 -P 3 -I CMD bash -c CMD;
 ```
 
-This Bash command uses the text file *commands.txt* to parallelize SLiM simulations on a specified number of processes. 
+This Bash command uses the text file *commands.txt* to parallelize SLiM simulations on a specified number of processes.
 
 **NOTE: The number of lines in the *commands.txt* file will be both the number of simulations parallelized and the number of cores on which to run these simulations.**
 
@@ -239,7 +243,7 @@ cd ps-2; bgzip ps_1250p1.vcf; bgzip ps_1250p2.vcf; bcftools index ps_1250p1.vcf.
 cd ps-3; bgzip ps_1250p1.vcf; bgzip ps_1250p2.vcf; bcftools index ps_1250p1.vcf.gz; bcftools index ps_1250p2.vcf.gz; bcftools merge ps_1250p1.vcf.gz ps_1250p2.vcf.gz -0 --force-samples > ps_1250p.vcf; python egglib_script.py ps_1250p.vcf > egglib-1250_results; cd ..
 ```
 
-Each line will index the resulting VCF files from the respective simulation for each population, will merge those indexed VCFs, and will run the *egglib_script.py* Python script to calculate evolutionary statistics on merged VCFs. Egglib.IO requires a unique Python script to be created to run specified sliding window evolutionary statistics on input data. The current script *egglib_script.py* is established to run S, Fs, Fst, D, Dxy, thetaW, Pi, and Da on VCF files from genomes with 10 coding and 10 noncoding regions of length 3000bp for a total genome size of 60000bp. If different evolutionary statistics need to be calculated or the default genome parameters are not the same as those run for the SLiM simulations, the *egglib_script.py* must be altered directly. 
+Each line will index the resulting VCF files from the respective simulation for each population, will merge those indexed VCFs, and will run the *egglib_script.py* Python script to calculate evolutionary statistics on merged VCFs. Egglib.IO requires a unique Python script to be created to run specified sliding window evolutionary statistics on input data. The current script *egglib_script.py* is established to run S, Fs, Fst, D, Dxy, thetaW, Pi, and Da on VCF files from genomes with 10 coding and 10 noncoding regions of length 3000bp for a total genome size of 60000bp. If different evolutionary statistics need to be calculated or the default genome parameters are not the same as those run for the SLiM simulations, the *egglib_script.py* must be altered directly.
 
 The output of Egglib.IO is a text file with statistic values for each evolutionary statistic by region:
 
@@ -252,18 +256,4 @@ The output of Egglib.IO is a text file with statistic values for each evolutiona
 {'S': 260, 'Fs': -5.732559889531498, 'Fst': 0.30774832282354403, 'D': -1.0856910028125963, 'Dxy': 0.19598076923076885, 'thetaW': 61.12551292416559, 'Pi': 43.315384615384495, 'Da': 0.060312753036436795}
 ```
 
-##### <u>4. Converting output files into CSV format</u>
-
-The resulting text files from evolutionary statistic calculation are then converted to CSV format using *awk* and *sed*. A header row with statistic names and a regions column specifying noncoding vs. coding regions are also added to these CSV files:
-
-> (before Jinja2 substitution)
-
-```bash
-for i in {1..{{ simnum }}}; do cd $1-$i; awk -F" " '/^\{/' egglib-{{ sample }}_results | sed 's/[A-Za-z]*//g' | awk -F" " '{print $2 $4 $6 $8 $10 $12 $14 $16}' | sed 's/.$//' | sed '1iS,Fs,Fst,D,Dxy,thetaW,Pi,Da,Region' | paste -d "," /dev/stdin regions.txt > $2_sampgen={{ sample }}_run=$i.csv; cd ..; done;
-```
-
-> (after Jinja2 substitution with simnum = 3 and sample = 1250)
-
-```bash
-for i in {1..3}; do cd $1-$i; awk -F" " '/^\{/' egglib-1250_results | sed 's/[A-Za-z]*//g' | awk -F" " '{print $2 $4 $6 $8 $10 $12 $14 $16}' | sed 's/.$//' | sed '1iS,Fs,Fst,D,Dxy,thetaW,Pi,Da,Region' | paste -d "," /dev/stdin regions.txt > $2_sampgen=1250_run=$i.csv; cd ..; done;
-```
+##### 
